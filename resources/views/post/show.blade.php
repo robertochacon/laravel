@@ -8,6 +8,7 @@
 	<div class="card-body">
 		<h1 class="card-title text-center text-white">{{ $info->title }}</h1>
 		<p class="card-text text-center text-white">{{ $info->description }}</p>
+		<a href="{{ route('Post.edit',$info->id,'edit') }}" class="btn btn-primary">Editar</a>
 	</div>
 
 @endsection('conten')

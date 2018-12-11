@@ -7,7 +7,7 @@
 <div class="row">
 	<div class="col-md-12">
 		<h1>Crud laravel ajax</h1>
-		<a href="#" class="btn btn-primary pull-right" data-toggle="modal" data-target="#create">Agregar Post</a>
+		<a href="{{ route('Post.create') }}" class="btn btn-primary pull-right">Agregar Post</a>
 <div class=" mt-5">
 	<div class="row">
 	@foreach($post as $item)
@@ -26,8 +26,6 @@
 	@endforeach()
 	</div>
 </div>
-			
-			@include('post.create')
 		</table>
 	</div>
 </div>
