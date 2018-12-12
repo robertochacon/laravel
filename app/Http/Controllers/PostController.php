@@ -36,6 +36,13 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
+        $dataValidate = $request->validate([
+            'title' => 'required|max:30',
+            'description' => 'required|max:200',
+            'avatar' => 'required|image',
+            'slug' => 'required|max:30',
+        ]);
+
         if ($request->hasFile('avatar')) {
             $image = $request->file('avatar');
             $name = time().$image->getClientOriginalName();
@@ -46,9 +53,10 @@ class PostController extends Controller
         $obj->title = $request->input('title');
         $obj->description = $request->input('description');
         $obj->avatar = $name;
+        $obj->slug = $request->input('slug');
         $obj->save();
 
-        return 'guardado';
+        return redirect()->route('Post.index')->with('status','Datos guardados sastifactoriamente!');
     }
 
     /**
@@ -57,9 +65,11 @@ class PostController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($slug)
     {
-        $info = Post::find($id);   
+
+        // $info = Post::find($id);   
+        $info = Post::where('slug','=',$slug)->firstOrFail();   
         return view('Post.show',compact('info'));
     }
 
@@ -69,9 +79,10 @@ class PostController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit($slug)
     {
-        $info = Post::find($id);   
+        $info = Post::where('slug','=',$slug)->firstOrFail();   
+        // $info = Post::find($slug);   
         return view('Post.edit',compact('info'));
         // return $info;
     }
@@ -83,9 +94,29 @@ class PostController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $slug)
     {
-        //
+        $dataValidate = $request->validate([
+            'title' => 'required|max:30',
+            'description' => 'required|max:200',
+            'avatar' => 'required|image',
+            'slug' => 'required|max:30',
+        ]);
+
+        $data = Post::where('slug',$slug)->firstOrFail();
+        $data->update($request->all());
+        if ($request->hasFile('avatar')) {
+            $file = $request->file('avatar');
+            $name = time().$file->getClientOriginalName();
+            $file->move(public_path().'/imagenes/',$name);
+        }
+        $data->avatar = $name;
+        $data->slug = $request->input('slug');
+        $data->save();
+
+        // return 'actualizado';
+        return redirect()->route('Post.show',[$slug])->with('status','Datos actualizados');
+
     }
 
     /**
@@ -94,8 +125,13 @@ class PostController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy($slug)
     {
-        //
+        $avatar = Post::where('slug',$slug)->pluck('avatar')->first();
+        $archivo = public_path().'/imagenes/'.$avatar;
+        \File::delete($archivo);
+        Post::where('slug',$slug)->delete();
+        // return $archivo;
+        return redirect()->route('Post.index')->with('status','Un articulo eliminado');
     }
 }
